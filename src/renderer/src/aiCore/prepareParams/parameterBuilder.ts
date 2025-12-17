@@ -40,6 +40,7 @@ import { stepCountIs } from 'ai'
 import { getAiSdkProviderId } from '../provider/factory'
 import { setupToolsConfig } from '../utils/mcp'
 import { buildProviderOptions } from '../utils/options'
+import { buildCombinedAbortSignal, normalizeMaxToolSteps } from '../utils/streamingTimeout'
 import { buildProviderBuiltinWebSearchConfig } from '../utils/websearch'
 import { addAnthropicHeaders } from './header'
 import { getMaxTokens, getTemperature, getTopP } from './modelParameters'
@@ -95,6 +96,10 @@ export async function buildStreamTextParams(
     enableUrlContext: boolean
   }
   webSearchPluginConfig?: WebSearchPluginConfig
+  streamingConfig?: {
+    idleTimeoutMs: number
+    idleAbortController: AbortController
+  }
 }> {
   const { mcpTools } = options
 
@@ -214,6 +219,36 @@ export async function buildStreamTextParams(
     }
   }
 
+  // Build streaming timeout config if SSE idle timeout is enabled
+  let streamingConfig:
+    | {
+        idleTimeoutMs: number
+        idleAbortController: AbortController
+      }
+    | undefined = undefined
+
+  // Build combined abort signal for request timeout, SSE idle timeout, and user abort
+  const signalsToComposite: (AbortSignal | undefined)[] = [options.requestOptions?.signal]
+
+  // Request hard timeout (minutes → ms)
+  if (provider.requestTimeoutMinutes && provider.requestTimeoutMinutes > 0) {
+    signalsToComposite.push(AbortSignal.timeout(provider.requestTimeoutMinutes * 60 * 1000))
+  }
+
+  // SSE idle timeout: we need a controller so the adapter can abort it
+  let idleAbortController: AbortController | undefined
+  if (provider.sseIdleTimeoutMinutes && provider.sseIdleTimeoutMinutes > 0) {
+    idleAbortController = new AbortController()
+    signalsToComposite.push(idleAbortController.signal)
+    streamingConfig = {
+      idleTimeoutMs: provider.sseIdleTimeoutMinutes * 60 * 1000,
+      idleAbortController
+    }
+  }
+
+  // Compose all signals into a single AbortSignal
+  const { signal: composedAbortSignal } = buildCombinedAbortSignal(signalsToComposite)
+
   // 构建基础参数
   // Note: standardParams (topK, frequencyPenalty, presencePenalty, stopSequences, seed)
   // are extracted from custom parameters and passed directly to streamText()
@@ -225,10 +260,10 @@ export async function buildStreamTextParams(
     topP: getTopP(assistant, model),
     // Include AI SDK standard params extracted from custom parameters
     ...standardParams,
-    abortSignal: options.requestOptions?.signal,
+    abortSignal: composedAbortSignal,
     headers,
     providerOptions,
-    stopWhen: stepCountIs(20),
+    stopWhen: stepCountIs(normalizeMaxToolSteps(provider.maxToolSteps)),
     maxRetries: 0
   }
 
@@ -246,7 +281,8 @@ export async function buildStreamTextParams(
     params,
     modelId: model.id,
     capabilities: { enableReasoning, enableWebSearch, enableGenerateImage, enableUrlContext },
-    webSearchPluginConfig
+    webSearchPluginConfig,
+    streamingConfig
   }
 }
 
