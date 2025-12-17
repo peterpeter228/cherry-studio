@@ -4551,6 +4551,29 @@
         "placeholder": "请输入 Markdown 格式内容...",
         "title": "模型备注"
       },
+      "streaming": {
+        "title": "流式传输与超时",
+        "section_title": "流式传输与超时",
+        "timer_settings": "计时器设置",
+        "request_timeout": {
+          "label": "硬请求超时",
+          "help": "通过 AbortSignal.timeout(...) 强制执行整个请求生命周期的上限。如果在此时间内未收到数据，请求将被中止。",
+          "placeholder": "输入超时时间（分钟）"
+        },
+        "sse_idle_timeout": {
+          "label": "SSE 空闲超时",
+          "help": "如果在配置的持续时间内未收到 SSE 数据，则中止请求。这可以避免静默挂起，同时不会终止健康的长时间流。",
+          "placeholder": "输入超时时间（分钟）"
+        },
+        "max_tool_steps": {
+          "label": "最大工具步骤数",
+          "help": "允许的最大工具调用步骤数。达到此限制时，请求将停止。",
+          "placeholder": "输入最大步骤数（默认：20）"
+        },
+        "timeout_unit": "分钟",
+        "save": "保存",
+        "reset": "重置"
+      },
       "oauth": {
         "button": "使用 {{provider}} 账号登录",
         "description": "本服务由 <website>{{provider}}</website> 提供",

@@ -61,6 +61,7 @@ import LMStudioSettings from './LMStudioSettings'
 import OVMSSettings from './OVMSSettings'
 import ProviderOAuth from './ProviderOAuth'
 import SelectProviderModelPopup from './SelectProviderModelPopup'
+import { StreamingSettingsPopup } from './StreamingSettings'
 import VertexAISettings from './VertexAISettings'
 
 interface Props {
@@ -601,6 +602,18 @@ const ProviderSetting: FC<Props> = ({ providerId }) => {
       {provider.id === 'copilot' && <GithubCopilotSettings providerId={provider.id} />}
       {provider.id === 'aws-bedrock' && <AwsBedrockSettings />}
       {provider.id === 'vertexai' && <VertexAISettings />}
+      <SettingSubtitle style={{ marginTop: 10 }}>
+        <Flex align="center" justify="space-between">
+          <div>{t('settings.provider.streaming.section_title')}</div>
+          <Button
+            type="text"
+            size="small"
+            icon={<Settings2 size={14} />}
+            onClick={() => StreamingSettingsPopup.show({ providerId: provider.id })}>
+            {t('settings.provider.streaming.timer_settings')}
+          </Button>
+        </Flex>
+      </SettingSubtitle>
       <ModelList providerId={provider.id} />
     </SettingContainer>
   )

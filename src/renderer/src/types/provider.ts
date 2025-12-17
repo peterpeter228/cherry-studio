@@ -127,6 +127,14 @@ export type Provider = {
   isVertex?: boolean
   notes?: string
   extra_headers?: Record<string, string>
+
+  // Streaming & Timeouts configuration
+  /** Hard request timeout in minutes. Enforces an upper bound for the overall request lifetime via AbortSignal.timeout(...) */
+  requestTimeoutMinutes?: number
+  /** SSE idle timeout in minutes. Aborts the request if no SSE data is received for the configured duration */
+  sseIdleTimeoutMinutes?: number
+  /** Maximum tool steps. Provider-configured stop condition applied via stepCountIs(maxToolSteps) */
+  maxToolSteps?: number
 }
 
 export const SystemProviderIdSchema = z.enum([

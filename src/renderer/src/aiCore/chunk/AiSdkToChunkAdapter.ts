@@ -4,7 +4,7 @@
  */
 
 import { loggerService } from '@logger'
-import type { AISDKWebSearchResult, MCPTool, WebSearchResults } from '@renderer/types'
+import type { AISDKWebSearchResult, MCPTool, Provider, WebSearchResults } from '@renderer/types'
 import { WebSearchSource } from '@renderer/types'
 import type { Chunk } from '@renderer/types/chunk'
 import { ChunkType } from '@renderer/types/chunk'
@@ -14,6 +14,7 @@ import { convertLinks, flushLinkConverterBuffer } from '@renderer/utils/linkConv
 import type { ClaudeCodeRawValue } from '@shared/agents/claudecode/types'
 import { AISDKError, type TextStreamPart, type ToolSet } from 'ai'
 
+import { createStreamingIdleTimeout } from '../utils/streamingTimeout'
 import { ToolCallChunkHandler } from './handleToolCallChunk'
 
 const logger = loggerService.withContext('AiSdkToChunkAdapter')
@@ -32,6 +33,7 @@ export class AiSdkToChunkAdapter {
   private firstTokenTimestamp: number | null = null
   private hasTextContent = false
   private getSessionWasCleared?: () => boolean
+  private idleTimeoutController?: { abortController: AbortController; resetIdleTimer: () => void }
 
   constructor(
     private onChunk: (chunk: Chunk) => void,
@@ -39,13 +41,26 @@ export class AiSdkToChunkAdapter {
     accumulate?: boolean,
     enableWebSearch?: boolean,
     onSessionUpdate?: (sessionId: string) => void,
-    getSessionWasCleared?: () => boolean
+    getSessionWasCleared?: () => boolean,
+    provider?: Provider,
+    parentAbortSignal?: AbortSignal
   ) {
     this.toolCallHandler = new ToolCallChunkHandler(onChunk, mcpTools)
     this.accumulate = accumulate
     this.enableWebSearch = enableWebSearch || false
     this.onSessionUpdate = onSessionUpdate
     this.getSessionWasCleared = getSessionWasCleared
+
+    // Setup SSE idle timeout if configured
+    if (provider?.sseIdleTimeoutMinutes) {
+      this.idleTimeoutController = createStreamingIdleTimeout(provider.sseIdleTimeoutMinutes, parentAbortSignal)
+      // Chain with parent signal if provided
+      if (parentAbortSignal) {
+        parentAbortSignal.addEventListener('abort', () => {
+          this.idleTimeoutController?.abortController.abort()
+        })
+      }
+    }
   }
 
   private markFirstTokenIfNeeded() {
@@ -92,8 +107,19 @@ export class AiSdkToChunkAdapter {
     this.isFirstChunk = true
     this.hasTextContent = false
 
+    // Check if aborted before starting
+    if (this.idleTimeoutController?.abortController.signal.aborted) {
+      reader.releaseLock()
+      throw new Error('Request aborted due to idle timeout')
+    }
+
     try {
       while (true) {
+        // Check abort signal before reading
+        if (this.idleTimeoutController?.abortController.signal.aborted) {
+          throw new Error('Request aborted due to idle timeout')
+        }
+
         const { done, value } = await reader.read()
 
         if (done) {
@@ -110,6 +136,9 @@ export class AiSdkToChunkAdapter {
           }
           break
         }
+
+        // Reset idle timer on receiving any chunk
+        this.idleTimeoutController?.resetIdleTimer()
 
         // 转换并发送 chunk
         this.convertAndEmitChunk(value, final)

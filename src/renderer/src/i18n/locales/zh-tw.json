@@ -4551,6 +4551,29 @@
         "placeholder": "輸入 Markdown 格式內容...",
         "title": "模型備註"
       },
+      "streaming": {
+        "title": "串流與超時",
+        "section_title": "串流與超時",
+        "timer_settings": "計時器設定",
+        "request_timeout": {
+          "label": "硬請求超時",
+          "help": "透過 AbortSignal.timeout(...) 強制執行整個請求生命週期的上限。如果在此時間內未收到資料，請求將被中止。",
+          "placeholder": "輸入超時時間（分鐘）"
+        },
+        "sse_idle_timeout": {
+          "label": "SSE 閒置超時",
+          "help": "如果在設定的持續時間內未收到 SSE 資料，則中止請求。這可以避免靜默掛起，同時不會終止健康的長時間串流。",
+          "placeholder": "輸入超時時間（分鐘）"
+        },
+        "max_tool_steps": {
+          "label": "最大工具步驟數",
+          "help": "允許的最大工具呼叫步驟數。達到此限制時，請求將停止。",
+          "placeholder": "輸入最大步驟數（預設：20）"
+        },
+        "timeout_unit": "分鐘",
+        "save": "儲存",
+        "reset": "重置"
+      },
       "oauth": {
         "button": "使用 {{provider}} 帳號登入",
         "description": "本服務由 <website>{{provider}}</website> 提供",

@@ -4551,6 +4551,29 @@
         "placeholder": "Enter Markdown content...",
         "title": "Model Notes"
       },
+      "streaming": {
+        "title": "Streaming & Timeouts",
+        "section_title": "Streaming & Timeouts",
+        "timer_settings": "Timer Settings",
+        "request_timeout": {
+          "label": "Hard Request Timeout",
+          "help": "Enforces an upper bound for the overall request lifetime via AbortSignal.timeout(...). If no data is received within this time, the request will be aborted.",
+          "placeholder": "Enter timeout in minutes"
+        },
+        "sse_idle_timeout": {
+          "label": "SSE Idle Timeout",
+          "help": "Aborts the request if no SSE data is received for the configured duration. This avoids 'silent hang' while not killing healthy long streams.",
+          "placeholder": "Enter timeout in minutes"
+        },
+        "max_tool_steps": {
+          "label": "Max Tool Steps",
+          "help": "Maximum number of tool-calling steps allowed. The request will stop when this limit is reached.",
+          "placeholder": "Enter maximum steps (default: 20)"
+        },
+        "timeout_unit": "minutes",
+        "save": "Save",
+        "reset": "Reset"
+      },
       "oauth": {
         "button": "Login with {{provider}}",
         "description": "This service is provided by <website>{{provider}}</website>",

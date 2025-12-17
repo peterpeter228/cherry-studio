@@ -182,6 +182,23 @@ export async function fetchChatCompletion({
     ]
   }
 
+  // Create hard request timeout AbortSignal if configured
+  let combinedSignal = requestOptions?.signal
+  if (provider.requestTimeoutMinutes && provider.requestTimeoutMinutes > 0) {
+    const timeoutMs = provider.requestTimeoutMinutes * 60 * 1000
+    const hardTimeoutSignal = AbortSignal.timeout(timeoutMs)
+
+    // Combine hard timeout with existing signal if provided
+    if (requestOptions?.signal) {
+      const controller = new AbortController()
+      hardTimeoutSignal.addEventListener('abort', () => controller.abort())
+      requestOptions.signal.addEventListener('abort', () => controller.abort())
+      combinedSignal = controller.signal
+    } else {
+      combinedSignal = hardTimeoutSignal
+    }
+  }
+
   // 使用 transformParameters 模块构建参数
   const {
     params: aiSdkParams,
@@ -191,7 +208,10 @@ export async function fetchChatCompletion({
   } = await buildStreamTextParams(messages, assistant, provider, {
     mcpTools: mcpTools,
     webSearchProviderId: assistant.webSearchProviderId,
-    requestOptions
+    requestOptions: {
+      ...requestOptions,
+      signal: combinedSignal
+    }
   })
 
   // Safely fallback to prompt tool use when function calling is not supported by model.
