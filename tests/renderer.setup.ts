@@ -57,7 +57,11 @@ vi.stubGlobal('api', {
 })
 
 if (typeof globalThis.localStorage === 'undefined' || typeof (globalThis.localStorage as any).getItem !== 'function') {
+<<<<<<< HEAD
   let store = new Map<string, string>()
+=======
+  const store = new Map<string, string>()
+>>>>>>> 340fad9f2 (feat: Add SSE idle timeout and other streaming configs (#1))
 
   const localStorageMock = {
     getItem: (key: string) => store.get(key) ?? null,
