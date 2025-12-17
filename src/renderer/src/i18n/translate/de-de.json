@@ -4564,6 +4564,24 @@
       "remove_invalid_keys": "Ungültige Schlüssel löschen",
       "search": "Modellplattform suchen...",
       "search_placeholder": "Modell-ID oder Name suchen",
+      "streaming": {
+        "description": "Konfigurieren Sie Anfrage-Hard-Timeout, SSE-Leerlauf-Timeout und maximale Tool-Schritte für lange Streams.",
+        "label": "Timer-Einstellungen",
+        "max_tool_steps": {
+          "help": "Begrenzt die Anzahl der Tool-Call-Schritte pro Anfrage.",
+          "label": "Max. Tool-Schritte"
+        },
+        "request_timeout": {
+          "help": "Bricht die Anfrage nach einer festen Dauer ab. 0 zum Deaktivieren.",
+          "label": "Hard-Timeout der Anfrage (Minuten)"
+        },
+        "reset": "Auf Standard zurücksetzen",
+        "sse_idle_timeout": {
+          "help": "Bricht ab, wenn innerhalb des Fensters keine Stream-Ereignisse empfangen werden. 0 zum Deaktivieren.",
+          "label": "SSE-Leerlauf-Timeout (Minuten)"
+        },
+        "title": "Streaming & Zeitlimits"
+      },
       "title": "Modelldienst",
       "vertex_ai": {
         "api_host_help": "Vertex AI-API-Adresse, nicht empfohlen, normalerweise für Reverse-Proxy geeignet",

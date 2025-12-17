@@ -4564,6 +4564,24 @@
       "remove_invalid_keys": "Supprimer les clés invalides",
       "search": "Rechercher une plateforme de modèles...",
       "search_placeholder": "Rechercher un ID ou un nom de modèle",
+      "streaming": {
+        "description": "Configurez le délai maximal de la requête, le délai d’inactivité SSE et le nombre max d’étapes d’outils pour les streams longs.",
+        "label": "Paramètres du minuteur",
+        "max_tool_steps": {
+          "help": "Limite le nombre d’étapes d’appel d’outils autorisées par requête.",
+          "label": "Étapes d’outils max"
+        },
+        "request_timeout": {
+          "help": "Annule la requête après une durée fixe. 0 pour désactiver.",
+          "label": "Délai maximal de requête (minutes)"
+        },
+        "reset": "Réinitialiser par défaut",
+        "sse_idle_timeout": {
+          "help": "Annule si aucun événement de streaming n’est reçu dans la fenêtre configurée. 0 pour désactiver.",
+          "label": "Délai d’inactivité SSE (minutes)"
+        },
+        "title": "Streaming et délais"
+      },
       "title": "Services de modèles",
       "vertex_ai": {
         "api_host_help": "Adresse API de Vertex AI, il n'est pas recommandé de la remplir, généralement utilisée pour un proxy inverse",

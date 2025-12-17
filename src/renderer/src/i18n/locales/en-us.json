@@ -4564,6 +4564,24 @@
       "remove_invalid_keys": "Remove Invalid Keys",
       "search": "Search Providers...",
       "search_placeholder": "Search model id or name",
+      "streaming": {
+        "description": "Configure request hard timeout, SSE idle timeout, and max tool steps for long-running streams.",
+        "label": "Timer settings",
+        "max_tool_steps": {
+          "help": "Limits how many tool-calling steps are allowed during a single request.",
+          "label": "Max tool steps"
+        },
+        "request_timeout": {
+          "help": "Aborts the request after a fixed duration. Set 0 to disable.",
+          "label": "Hard request timeout (minutes)"
+        },
+        "reset": "Reset to defaults",
+        "sse_idle_timeout": {
+          "help": "Aborts the request if no streaming events are received within the configured window. Set 0 to disable.",
+          "label": "SSE idle timeout (minutes)"
+        },
+        "title": "Streaming & Timeouts"
+      },
       "title": "Model Provider",
       "vertex_ai": {
         "api_host_help": "The API host for Vertex AI, not recommended to fill in, generally applicable to reverse proxy",

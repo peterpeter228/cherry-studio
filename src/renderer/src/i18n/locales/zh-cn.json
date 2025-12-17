@@ -4564,6 +4564,24 @@
       "remove_invalid_keys": "删除无效密钥",
       "search": "搜索模型平台...",
       "search_placeholder": "搜索模型 ID 或名称",
+      "streaming": {
+        "description": "为长时间运行的流式请求配置请求硬超时、SSE 空闲超时与最大工具步数。",
+        "label": "计时器设置",
+        "max_tool_steps": {
+          "help": "限制一次请求中允许的工具调用循环步数，以避免无限循环。",
+          "label": "最大工具步数"
+        },
+        "request_timeout": {
+          "help": "在固定时长后强制终止请求。设为 0 表示关闭。",
+          "label": "请求硬超时（分钟）"
+        },
+        "reset": "恢复默认",
+        "sse_idle_timeout": {
+          "help": "在指定时长内未收到任何流式事件则终止请求。设为 0 表示关闭。",
+          "label": "SSE 空闲超时（分钟）"
+        },
+        "title": "流式与超时"
+      },
       "title": "模型服务",
       "vertex_ai": {
         "api_host_help": "Vertex AI 的 API 地址，不建议填写，通常适用于反向代理",

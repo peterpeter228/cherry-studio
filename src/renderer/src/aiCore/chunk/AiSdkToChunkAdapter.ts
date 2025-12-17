@@ -14,6 +14,7 @@ import { convertLinks, flushLinkConverterBuffer } from '@renderer/utils/linkConv
 import type { ClaudeCodeRawValue } from '@shared/agents/claudecode/types'
 import { AISDKError, type TextStreamPart, type ToolSet } from 'ai'
 
+import { createStreamingIdleTimeout, type StreamingIdleTimeout } from '../utils/streamingTimeout'
 import { ToolCallChunkHandler } from './handleToolCallChunk'
 
 const logger = loggerService.withContext('AiSdkToChunkAdapter')
@@ -32,6 +33,8 @@ export class AiSdkToChunkAdapter {
   private firstTokenTimestamp: number | null = null
   private hasTextContent = false
   private getSessionWasCleared?: () => boolean
+  private idleTimeout?: StreamingIdleTimeout
+  private idleAbortController?: AbortController
 
   constructor(
     private onChunk: (chunk: Chunk) => void,
@@ -39,13 +42,27 @@ export class AiSdkToChunkAdapter {
     accumulate?: boolean,
     enableWebSearch?: boolean,
     onSessionUpdate?: (sessionId: string) => void,
-    getSessionWasCleared?: () => boolean
+    getSessionWasCleared?: () => boolean,
+    streamingConfig?: {
+      idleTimeoutMs: number
+      idleAbortController: AbortController
+    }
   ) {
     this.toolCallHandler = new ToolCallChunkHandler(onChunk, mcpTools)
     this.accumulate = accumulate
     this.enableWebSearch = enableWebSearch || false
     this.onSessionUpdate = onSessionUpdate
     this.getSessionWasCleared = getSessionWasCleared
+    if (streamingConfig && streamingConfig.idleTimeoutMs > 0) {
+      this.idleAbortController = streamingConfig.idleAbortController
+      this.idleTimeout = createStreamingIdleTimeout({
+        idleTimeoutMs: streamingConfig.idleTimeoutMs,
+        onTimeout: () => {
+          // Abort stream if no SSE events received within idleTimeoutMs
+          this.idleAbortController?.abort(new DOMException('SSE stream idle timeout', 'AbortError'))
+        }
+      })
+    }
   }
 
   private markFirstTokenIfNeeded() {
@@ -91,6 +108,7 @@ export class AiSdkToChunkAdapter {
     // Reset state at the start of stream
     this.isFirstChunk = true
     this.hasTextContent = false
+    this.idleTimeout?.reset()
 
     try {
       while (true) {
@@ -111,11 +129,15 @@ export class AiSdkToChunkAdapter {
           break
         }
 
+        // Mark the stream as alive on any chunk
+        this.idleTimeout?.reset()
+
         // 转换并发送 chunk
         this.convertAndEmitChunk(value, final)
       }
     } finally {
       reader.releaseLock()
+      this.idleTimeout?.clear()
       this.resetTimingState()
     }
   }

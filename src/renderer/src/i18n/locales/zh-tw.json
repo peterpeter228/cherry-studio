@@ -4564,6 +4564,24 @@
       "remove_invalid_keys": "刪除無效金鑰",
       "search": "搜尋模型平臺...",
       "search_placeholder": "搜尋模型 ID 或名稱",
+      "streaming": {
+        "description": "為長時間執行的串流請求設定請求硬逾時、SSE 閒置逾時與最大工具步數。",
+        "label": "計時器設定",
+        "max_tool_steps": {
+          "help": "限制單次請求中允許的工具呼叫循環步數，以避免無限循環。",
+          "label": "最大工具步數"
+        },
+        "request_timeout": {
+          "help": "在固定時長後強制終止請求。設為 0 表示停用。",
+          "label": "請求硬逾時（分鐘）"
+        },
+        "reset": "恢復預設",
+        "sse_idle_timeout": {
+          "help": "在指定時長內未收到任何串流事件則終止請求。設為 0 表示停用。",
+          "label": "SSE 閒置逾時（分鐘）"
+        },
+        "title": "串流與逾時"
+      },
       "title": "模型提供者",
       "vertex_ai": {
         "api_host_help": "Vertex AI 的 API 位址，不建議填寫，通常適用於反向代理",

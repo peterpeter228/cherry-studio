@@ -214,6 +214,17 @@ export function providerToAiSdkConfig(actualProvider: Provider, model: Model): A
   } else if (aiSdkProviderId === 'azure') {
     extraOptions.mode = 'chat'
   }
+  if (isAzureOpenAIProvider(actualProvider)) {
+    const apiVersion = actualProvider.apiVersion?.trim()
+    if (apiVersion) {
+      extraOptions.apiVersion = apiVersion
+      // Azure OpenAI "traditional" API versions (date-based) use deployment-based URLs
+      // while `v1` / `preview` are routed through the responses API.
+      if (!['preview', 'v1'].includes(apiVersion)) {
+        extraOptions.useDeploymentBasedUrls = true
+      }
+    }
+  }
 
   // bedrock
   if (aiSdkProviderId === 'bedrock') {

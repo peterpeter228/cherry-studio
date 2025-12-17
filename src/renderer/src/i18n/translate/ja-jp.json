@@ -4564,6 +4564,24 @@
       "remove_invalid_keys": "無効なキーを削除",
       "search": "プロバイダーを検索...",
       "search_placeholder": "モデルIDまたは名前を検索",
+      "streaming": {
+        "description": "長時間ストリーム向けに、リクエストのハードタイムアウト、SSE アイドルタイムアウト、最大ツール手順を設定します。",
+        "label": "タイマー設定",
+        "max_tool_steps": {
+          "help": "1 回のリクエストで許可するツール呼び出し手順数を制限します。",
+          "label": "最大ツール手順"
+        },
+        "request_timeout": {
+          "help": "一定時間後にリクエストを中断します。0 で無効。",
+          "label": "リクエストのハードタイムアウト（分）"
+        },
+        "reset": "既定値に戻す",
+        "sse_idle_timeout": {
+          "help": "指定時間内にストリーミングイベントが届かない場合に中断します。0 で無効。",
+          "label": "SSE アイドルタイムアウト（分）"
+        },
+        "title": "ストリーミングとタイムアウト"
+      },
       "title": "モデルプロバイダー",
       "vertex_ai": {
         "api_host_help": "Vertex AIのAPIアドレス。逆プロキシに適しています。",

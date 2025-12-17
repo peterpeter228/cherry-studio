@@ -4564,6 +4564,24 @@
       "remove_invalid_keys": "Remover chaves inválidas",
       "search": "Procurar plataforma de modelos...",
       "search_placeholder": "Procurar ID ou nome do modelo",
+      "streaming": {
+        "description": "Configura o timeout duro do pedido, o timeout de inatividade SSE e o máximo de passos de ferramentas para streams longos.",
+        "label": "Definições do temporizador",
+        "max_tool_steps": {
+          "help": "Limita quantos passos de chamadas de ferramentas são permitidos por pedido.",
+          "label": "Máx. passos de ferramentas"
+        },
+        "request_timeout": {
+          "help": "Interrompe o pedido após uma duração fixa. 0 para desativar.",
+          "label": "Timeout duro do pedido (minutos)"
+        },
+        "reset": "Repor predefinições",
+        "sse_idle_timeout": {
+          "help": "Interrompe se não forem recebidos eventos de streaming dentro da janela configurada. 0 para desativar.",
+          "label": "Timeout de inatividade SSE (minutos)"
+        },
+        "title": "Streaming e timeouts"
+      },
       "title": "Serviços de Modelos",
       "vertex_ai": {
         "api_host_help": "O endereço da API do Vertex AI, não é recomendado preencher, normalmente aplicável a proxy reverso",

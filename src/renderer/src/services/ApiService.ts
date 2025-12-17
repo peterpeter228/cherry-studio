@@ -51,6 +51,26 @@ import type { StreamProcessorCallbacks } from './StreamProcessingService'
 
 const logger = loggerService.withContext('ApiService')
 
+function toPositiveMinutesMs(minutes: number | undefined): number | undefined {
+  const value = minutes ?? 0
+  if (!Number.isFinite(value) || value <= 0) {
+    return undefined
+  }
+  return value * 60_000
+}
+
+function combineAbortSignals(signals: Array<AbortSignal | undefined>): AbortSignal | undefined {
+  const defined = signals.filter(Boolean) as AbortSignal[]
+  if (defined.length === 0) {
+    return undefined
+  }
+  if (defined.length === 1) {
+    return defined[0]
+  }
+  // Node 22+ supports AbortSignal.any
+  return AbortSignal.any(defined)
+}
+
 export async function fetchMcpTools(assistant: Assistant) {
   // Get MCP tools (Fix duplicate declaration)
   let mcpTools: MCPTool[] = [] // Initialize as empty array
@@ -183,6 +203,29 @@ export async function fetchChatCompletion({
   }
 
   // 使用 transformParameters 模块构建参数
+  const requestTimeoutMs = toPositiveMinutesMs(provider.requestTimeoutMinutes)
+  const idleTimeoutMs = toPositiveMinutesMs(provider.sseIdleTimeoutMinutes)
+  const idleAbortController = idleTimeoutMs ? new AbortController() : undefined
+  const timeoutSignal = requestTimeoutMs ? AbortSignal.timeout(requestTimeoutMs) : undefined
+  const combinedSignal = combineAbortSignals([requestOptions?.signal, timeoutSignal, idleAbortController?.signal])
+
+  const resolvedRequestOptions = requestOptions
+    ? {
+        ...requestOptions,
+        signal: combinedSignal
+      }
+    : combinedSignal
+      ? { signal: combinedSignal }
+      : undefined
+
+  const streamingConfig =
+    idleTimeoutMs && idleAbortController
+      ? {
+          idleTimeoutMs,
+          idleAbortController
+        }
+      : undefined
+
   const {
     params: aiSdkParams,
     modelId,
@@ -191,7 +234,7 @@ export async function fetchChatCompletion({
   } = await buildStreamTextParams(messages, assistant, provider, {
     mcpTools: mcpTools,
     webSearchProviderId: assistant.webSearchProviderId,
-    requestOptions
+    requestOptions: resolvedRequestOptions
   })
 
   // Safely fallback to prompt tool use when function calling is not supported by model.
@@ -221,7 +264,8 @@ export async function fetchChatCompletion({
     assistant,
     topicId,
     callType: 'chat',
-    uiMessages
+    uiMessages,
+    streamingConfig
   })
 }
 
