@@ -1,0 +1,57 @@
+name: build-windows-x64
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  win_x64:
+    runs-on: windows-latest
+    env:
+      # 防止 electron-builder 在没有签名证书时卡住/失败
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "yarn"
+          cache-dependency-path: |
+            yarn.lock
+            .yarnrc.yml
+
+      - name: Enable Corepack (Yarn 4)
+        run: corepack enable
+
+      # 如果仓库没有提交 .env，dotenv-cli 仍可能依赖文件存在；这里兜底创建空文件
+      - name: Ensure .env exists
+        shell: pwsh
+        run: |
+          if (!(Test-Path ".env")) { New-Item -Path ".env" -ItemType File | Out-Null }
+
+      - name: Install deps (Yarn 4)
+        run: yarn install --immutable
+
+      # 可选：你要更快拿到exe可注释掉这两步
+      - name: Lint
+        run: yarn lint
+
+      - name: Test
+        run: yarn test
+
+      # 关键：按你的 scripts 正确打 Windows x64 安装包
+      - name: Build Windows x64 installer
+        run: yarn build:win:x64
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: CherryStudio-win-x64
+          path: |
+            dist/*.exe
+            dist/**/*.exe
