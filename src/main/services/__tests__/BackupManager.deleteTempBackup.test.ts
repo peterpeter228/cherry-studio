@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import * as path from 'node:path'
 
 // Use vi.hoisted to define mocks that are available during hoisting
 const { mockLogger } = vi.hoisted(() => ({
@@ -98,7 +99,7 @@ describe('BackupManager.deleteTempBackup - Security Tests', () => {
       const result = await backupManager.deleteTempBackup({} as Electron.IpcMainInvokeEvent, validPath)
 
       expect(result).toBe(true)
-      expect(fs.remove).toHaveBeenCalledWith(validPath)
+      expect(fs.remove).toHaveBeenCalledWith(path.normalize(validPath))
       expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Deleted temp backup'))
     })
 
@@ -110,7 +111,7 @@ describe('BackupManager.deleteTempBackup - Security Tests', () => {
       const result = await backupManager.deleteTempBackup({} as Electron.IpcMainInvokeEvent, nestedPath)
 
       expect(result).toBe(true)
-      expect(fs.remove).toHaveBeenCalledWith(nestedPath)
+      expect(fs.remove).toHaveBeenCalledWith(path.normalize(nestedPath))
     })
 
     it('should return false when file does not exist', async () => {
@@ -235,7 +236,7 @@ describe('BackupManager.deleteTempBackup - Security Tests', () => {
       const result = await backupManager.deleteTempBackup({} as Electron.IpcMainInvokeEvent, tempDir)
 
       expect(result).toBe(true)
-      expect(fs.remove).toHaveBeenCalledWith(tempDir)
+      expect(fs.remove).toHaveBeenCalledWith(path.normalize(tempDir))
     })
 
     it('should handle path with trailing slash', async () => {

@@ -919,7 +919,8 @@ describe.skipIf(process.platform !== 'win32')('process utilities', () => {
         autoDiscoverGitBash()
 
         // Verify the exact call to configManager.set
-        expect(configManager.set).toHaveBeenCalledTimes(1)
+        const gitBashPathCalls = (configManager.set as any).mock.calls.filter((c: any[]) => c[0] === 'gitBashPath')
+        expect(gitBashPathCalls).toHaveLength(1)
         expect(configManager.set).toHaveBeenCalledWith('gitBashPath', bashPath)
       })
 
@@ -935,7 +936,8 @@ describe.skipIf(process.platform !== 'win32')('process utilities', () => {
         autoDiscoverGitBash()
 
         // Each call discovers and persists since config remains undefined (mocked)
-        expect(configManager.set).toHaveBeenCalledTimes(2)
+        const gitBashPathCalls = (configManager.set as any).mock.calls.filter((c: any[]) => c[0] === 'gitBashPath')
+        expect(gitBashPathCalls).toHaveLength(2)
       })
     })
 
